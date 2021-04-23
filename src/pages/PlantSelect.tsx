@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import { useNavigation } from "@react-navigation/core";
 
 import api from "../services/api";
 
@@ -17,29 +18,24 @@ import { Load } from "../components/Load";
 
 import colors from "../styles/colors";
 import fonts from "../styles/fonts";
+import { IPlantProps } from "../libs/storage";
 
 interface IEnviroment {
   key: string;
   title: string;
 }
 
-interface IPlant {
-  id: number;
-  name: string;
-  photo: string;
-  environments: string[],
-}
-
 export function PlantSelect() {
+  const navigation = useNavigation();
+
   const [loading, setLoading] = useState(true);
   const [selectedEnviroment, setSelectedEnviroment] = useState('all');
   const [enviroments, setEnviroments] = useState<IEnviroment[]>([]);
-  const [plants, setPlants] = useState<IPlant[]>([]);
-  const [filteredPlants, setFilteredPlants] = useState<IPlant[]>([]);
+  const [plants, setPlants] = useState<IPlantProps[]>([]);
+  const [filteredPlants, setFilteredPlants] = useState<IPlantProps[]>([]);
 
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [loadedAll, setLoadedAll] = useState(false);
 
   async function fetchPlants() {
     try {
@@ -69,6 +65,10 @@ export function PlantSelect() {
     setLoadingMore(true);
     setPage(oldValue => oldValue + 1);
     fetchPlants();
+  }
+
+  function handlePlantSelect(plant: IPlantProps) {
+    navigation.navigate('PlantSave', { plant });
   }
 
   useEffect(() => {
@@ -133,6 +133,7 @@ export function PlantSelect() {
           renderItem={({ item }) => (
             <PlantCardPrimary
               plant={item}
+              onPress={() => handlePlantSelect(item)}
             />
           )}
           keyExtractor={(item) => item.id.toString()}
